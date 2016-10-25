@@ -9,11 +9,20 @@
             android:theme="@style/AppTheme" >
         <activity
                 android:name=".MainActivity"
-                android:label="@string/app_name" >
+                android:label="@string/app_name"
+                android:launchMode="singleInstance" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="com.kinvey.android.ACTION_OFFLINE_SYNC" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="training" />  <!-- This is the scheme which must be changed -->
             </intent-filter>
         </activity>
 
