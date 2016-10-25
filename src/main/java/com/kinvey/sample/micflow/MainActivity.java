@@ -1,24 +1,21 @@
 package com.kinvey.sample.micflow;
 
-import java.io.IOException;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.User;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
-import com.kinvey.java.core.DownloaderProgressListener;
-import com.kinvey.java.core.MediaHttpDownloader;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -57,6 +54,11 @@ public class MainActivity extends ActionBarActivity {
         updateStatus();
     }
 
+    @Override
+    public void onNewIntent(Intent intent){
+        super.onNewIntent(intent);
+        kinveyClient.user().onOAuthCallbackRecieved(intent);
+    }
 
     private void bindViews(){
         loginStatus = (TextView) findViewById(R.id.login_status);
@@ -96,8 +98,8 @@ public class MainActivity extends ActionBarActivity {
 
     private void loginWithLoginPage(){
         loading();
-        kinveyClient.user().presentMICLoginActivity(redirectURI, new KinveyUserCallback(){
-//        kinveyClient.user().loginWithAuthorizationCodeLoginPage(redirectURI, new KinveyMICCallback() {
+//        kinveyClient.user().presentMICLoginActivity(redirectURI, new KinveyUserCallback(){
+        kinveyClient.user().loginWithAuthorizationCodeLoginPage(redirectURI, new KinveyMICCallback() {
 
             @Override
             public void onSuccess(User user) {
@@ -109,22 +111,39 @@ public class MainActivity extends ActionBarActivity {
                 errorView.setText(error.getMessage());
             }
 
-//            @Override
-//            public void onReadyToRender(String myURLToRender) {
-//                Uri uri = Uri.parse(myURLToRender);
-//                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-//                startActivity(intent);
-//            }
+            @Override
+            public void onReadyToRender(String myURLToRender) {
+                //Time to render the login page for the user!
+                //This renders the login page with the device's default browser
+                Uri uri = Uri.parse(myURLToRender);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
         });
     }
 
     private void loginAutomated(){
         loading();
+        kinveyClient.user().setMICApiVersion("v1");
         kinveyClient.user().loginWithAuthorizationCodeAPI(USERNAME, PASSWORD, redirectURI, new KinveyUserCallback() {
 
             @Override
             public void onSuccess(User user) {
                 updateStatus();
+
+//                AsyncAppData<HeaderEntity> myEvents = kinveyClient.appData("headers", HeaderEntity.class);
+//                myEvents.get(new KinveyListCallback<HeaderEntity>() {
+//                    @Override
+//                    public void onSuccess(HeaderEntity[] result) {
+//                        Log.d("INFO", result[0].toString());
+//                        loginStatus.setText("received " + result[0].toString());
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Throwable error) {
+//                        loginStatus.setText("failed to fetchByFilterCriteria" + error);
+//                    }
+//                });
 
             }
 
